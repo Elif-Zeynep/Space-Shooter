@@ -7,19 +7,15 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private float _speed = 3f;
 
-    [SerializeField]
-    private Player _player;
-
-    [SerializeField]
+    private UIManager _uiManager;
     private Animator _animator;
+    private GameManager _gameManager;
 
     PolygonCollider2D _collider;
     bool _isDead;
-    float _speedDecreaseSpeed;
+    float _speedDecreaseSpeed = 0.001f;
 
-    [SerializeField]
     private AudioSource _explosionAudioSource;
-    [SerializeField]
     private AudioSource _laserAudioSource;
 
     [SerializeField]
@@ -28,34 +24,44 @@ public class Enemy : MonoBehaviour
     private float _nextFire = 3.0f;
     private float _bulletOffset = -1.3f;
 
+    private bool _playersAlive = true;
+
     // Start is called before the first frame update
     void Start()
     {
-        _player = GameObject.Find("Player").GetComponent<Player>();
-        if (_player == null)
-        {
-            Debug.LogError("The Player is NULL.");
-        }
+        _isDead = false;
+        _speedDecreaseSpeed = 0f;
+        _playersAlive = true;
+        _collider = GetComponent<PolygonCollider2D>();
         _animator = GetComponent<Animator>();
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+        _explosionAudioSource = GameObject.Find("Audio_Manager").transform.Find("Explosion").GetComponent<AudioSource>();
+        _laserAudioSource = GameObject.Find("Audio_Manager").transform.Find("LaserFire").GetComponent<AudioSource>();
+        _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+        if (_uiManager == null)
+        {
+            Debug.LogError("The UI Manager is NULL.");
+        }
         if (_animator == null)
         {
             Debug.LogError("The Enemy Animator is NULL.");
         }
-        _collider = GetComponent<PolygonCollider2D>();
-        _isDead = false;
-        _speedDecreaseSpeed = 0f;
-
-        _explosionAudioSource = GameObject.Find("Audio_Manager").transform.Find("Explosion").GetComponent<AudioSource>();
         if (_explosionAudioSource == null)
         {
             Debug.LogError("Explosion AudioSource is NULL.");
         }
-        _laserAudioSource = GameObject.Find("Audio_Manager").transform.Find("LaserFire").GetComponent<AudioSource>();
         if (_laserAudioSource == null)
         {
             Debug.LogError("Laser AudioSource is NULL.");
         }
-
+        if (_gameManager == null)
+        {
+            Debug.LogError("The Game Manager is NULL.");
+        }
+        _speed = _gameManager.GetEnemySpeed();
+        _fireRate = Random.Range(0f, 3f);
+        _nextFire = Time.time + _fireRate;
     }
 
     // Update is called once per frame
@@ -66,8 +72,15 @@ public class Enemy : MonoBehaviour
         // if bottom respawn at top w new random x position
         if ( (transform.position.y < -5.9f )  && (!_isDead))
         {
-            float randX = Random.Range(-8.0f, 8.0f);
-            transform.position = (new Vector3(randX, 7.8f,0));
+            if (_playersAlive)
+            {
+                float randX = Random.Range(-8.0f, 8.0f);
+                transform.position = (new Vector3(randX, 7.8f, 0));
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
         }
         if (Time.time >= _nextFire && _isDead == false)
         {
@@ -77,6 +90,7 @@ public class Enemy : MonoBehaviour
 
     void UpdateMovement()
     {
+        UpdateSpeed();
         transform.Translate(new Vector3(0, -1, 0) * Time.deltaTime * _speed);
     }
 
@@ -102,9 +116,9 @@ public class Enemy : MonoBehaviour
                 if (laser.IsEnemyBullet() == false)
                 {
                     Destroy(other.gameObject);
-                    if (_player != null) // null check player component
+                    if (_uiManager != null) // null check player component
                     {
-                        _player.IncreaseScore(5);
+                        _uiManager.IncreaseScore(5);
                     }
                     EnemyDeath();
                 }
@@ -117,14 +131,21 @@ public class Enemy : MonoBehaviour
         _isDead = true;
         _collider.enabled = false;
 
-        _speedDecreaseSpeed += 0.004f;  // slow down behavior
-        _speed -= _speedDecreaseSpeed;
-        if (_speed < 0f)
-        {
-            _speed = 0f;
-        }
         _animator.SetTrigger("OnEnemyDeath");
         Destroy(this.gameObject, 2.37f);
+    }
+
+    void UpdateSpeed()
+    {
+        if (_isDead)
+        {
+            _speedDecreaseSpeed += 0.001f;  // slow down behavior
+            _speed -= _speedDecreaseSpeed;
+            if (_speed < 0f)
+            {
+                _speed = 0f;
+            }
+        }
     }
 
     void ShootLaser()
@@ -134,6 +155,9 @@ public class Enemy : MonoBehaviour
         Vector3 pos = new Vector3(transform.position.x, transform.position.y + _bulletOffset, transform.position.z);
         GameObject enemyLaser = Instantiate(_laserPrefab, pos, Quaternion.identity);
         enemyLaser.GetComponent<Laser>().MakeEnemyLaser();
-        _laserAudioSource.Play();
+        if (_laserAudioSource != null)
+        {
+            _laserAudioSource.Play();
+        }
     }
 }

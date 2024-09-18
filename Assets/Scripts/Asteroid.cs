@@ -15,7 +15,6 @@ public class Asteroid : MonoBehaviour
     private SpawnManager _spawnManager;
     PolygonCollider2D _collider;
 
-    [SerializeField]
     private AudioSource _explosionAudioSource;
 
     // Start is called before the first frame update

@@ -12,15 +12,22 @@ public class Powerup : MonoBehaviour
 
     [SerializeField]
     private AudioSource _powerupAudioSource;
+    private GameManager _gameManager;
     // Start is called before the first frame update
 
     void Start()
     {
         _powerupAudioSource = GameObject.Find("Audio_Manager").transform.Find("Powerup").GetComponent<AudioSource>();
+        _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         if (_powerupAudioSource == null)
         {
             Debug.LogError("Powerup AudioSource is NULL.");
         }
+        if (_gameManager == null)
+        {
+            Debug.LogError("The Game Manager is NULL.");
+        }
+        _speed = _gameManager.GetPowerupSpeed();
     }
 
     // Update is called once per frame

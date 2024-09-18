@@ -13,10 +13,16 @@ public class SpawnManager : MonoBehaviour
     private GameObject[] powerups;
 
     private bool _stopSpawning = false;
+    private GameManager _gameManager;
 
     // Start is called before the first frame update
     void Start()
     {
+        _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        if (_gameManager == null)
+        {
+            Debug.LogError("The Game Manager is NULL");
+        }
 
     }
 
@@ -24,6 +30,7 @@ public class SpawnManager : MonoBehaviour
     {
         StartCoroutine(SpawnEnemyRoutine());
         StartCoroutine(SpawnPowerupRoutine());
+        _gameManager.StartUpdateSpeed();
     }
 
     // Update is called once per frame
@@ -56,7 +63,7 @@ public class SpawnManager : MonoBehaviour
             Vector3 pos = new Vector3(Random.Range(-8f, 8f), 8, 0);
             int randPowerup = Random.Range(0,3);
             Instantiate(powerups[randPowerup], pos, Quaternion.identity);
-            yield return new WaitForSeconds(Random.Range(4f, 8f));  // spawn every 4-8 seconds randomly
+            yield return new WaitForSeconds(Random.Range(5f, 9f));  // spawn every 5-9 seconds randomly
         }
     }
 

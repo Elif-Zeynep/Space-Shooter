@@ -17,9 +17,7 @@ public class Player : MonoBehaviour
     private bool _downInput;
 
     [SerializeField]
-    private int _score;
-    [SerializeField]
-    private float _speed = 7f;
+    private float _speed = 6f;
     private float _upperbound = 2.3f;
     private float _bottombound = -3.8f;
     private float _leftbound = -11.4f;
@@ -63,6 +61,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _laserAudioClip;
     private AudioSource _AudioSource;
+    private AudioSource _explosionAudioSource;
 
     // in case of getting the same powerup multiple times, to not turn it off
     private int _tripleShotNum;
@@ -78,11 +77,17 @@ public class Player : MonoBehaviour
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();   // can also find by tag
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
         _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        _score = _tripleShotNum = _speedNum = _shieldNum = 0;
+        _explosionAudioSource = GameObject.Find("Audio_Manager").transform.Find("Explosion").GetComponent<AudioSource>();
+        _tripleShotNum = _speedNum = _shieldNum = 0;
 
         _rightEngine.SetActive(false);
         _leftEngine.SetActive(false);
         _AudioSource = GetComponent<AudioSource>();
+
+        if (_explosionAudioSource == null)
+        {
+            Debug.LogError("Explosion AudioSource is NULL.");
+        }
 
         if (_spawnManager == null)
         {
@@ -112,12 +117,13 @@ public class Player : MonoBehaviour
         {
             transform.position = new Vector3(0, 0, 0);
         }
-
+        _speed = _gameManager.GetPlayerSpeed();
     }
 
     // Update is called once per frame
     void Update()
     {
+        _speed = _gameManager.GetPlayerSpeed();
         UpdateMovement();
         if (_isRightPlayer)
         {
@@ -209,7 +215,6 @@ public class Player : MonoBehaviour
     }
     void ShootLaser()
     {
-        //Debug.Log("Space key pressed");
         _nextFire = Time.time + _fireRate;
         if (_tripleShotActivated)
         {
@@ -235,11 +240,10 @@ public class Player : MonoBehaviour
 
         _lives -= 1;
         _uiManager.UpdateLives(_lives, _isRightPlayer);
-        //_uiManager.DecreaseLives();
 
         if ( _lives < 1)
         {
-            //_spawnManager.PlayerDied();
+            _explosionAudioSource.Play();
             Destroy(this.gameObject);
         } 
     }
@@ -294,12 +298,6 @@ public class Player : MonoBehaviour
             _shieldActivated = false;
             _shieldVisualizer.SetActive(false);
         }
-    }
-
-    public void IncreaseScore(int points)
-    {
-        _score += points;
-        _uiManager.UpdateScore(_score);
     }
 
     void EngineDamage()

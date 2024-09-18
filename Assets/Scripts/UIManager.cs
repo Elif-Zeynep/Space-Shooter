@@ -7,7 +7,10 @@ using UnityEngine.SceneManagement;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
-    private Text _scoreText;
+    private Text _scoreText, _bestScoreText;
+
+    [SerializeField]
+    private int _score, _bestScore;
 
     [SerializeField]
     private Text _gameOverText;
@@ -36,34 +39,29 @@ public class UIManager : MonoBehaviour
 
     private bool _everySecondLoop;
 
-    private int _livesNum = 3;
     [SerializeField]
-    private int _score = 0;
+    private int _livesNum = 3;
 
     [SerializeField]
     private AudioSource _backgroundAudioSource;
 
-
     // Start is called before the first frame update
     void Start()
     {
+        _bestScore = PlayerPrefs.GetInt("HighScore", 0);
+        _bestScoreText.text = "Best: " + _bestScore;
         _score = 0;
-        _scoreText.text = "SCORE: " + 0;
+        _scoreText.text = "Score: " + 0;
         _gameOverText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
         _mainMenuText.gameObject.SetActive(false);
         _pauseText.gameObject.SetActive(false);
         _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         _everySecondLoop = false;
-        _livesNum = 3;
 
         if (_gameManager == null)
         {
             Debug.LogError("The Game Manager is NULL");
-        }
-        if (_gameManager.IsCoopMode())
-        {
-            _livesNum = 6;
         }
         _backgroundAudioSource = GameObject.Find("Audio_Manager").transform.Find("Background").GetComponent<AudioSource>();
         if (_backgroundAudioSource == null)
@@ -99,6 +97,7 @@ public class UIManager : MonoBehaviour
     }
     void GameOverSequence()
     {
+        UpdateBestScore();
         _gameOverText.gameObject.SetActive(true);
         _restartText.gameObject.SetActive(true);
         _mainMenuText.gameObject.SetActive(true);
@@ -145,12 +144,22 @@ public class UIManager : MonoBehaviour
     public void IncreaseScore(int points)
     {
         _score += points;
-        _scoreText.text = "SCORE: " + _score.ToString();
+        _scoreText.text = "Score: " + _score.ToString();
+    }
+
+    public void UpdateBestScore()
+    {
+        if (_score > _bestScore)
+        {
+            _bestScore = _score;
+            //_bestScoreText.text = "Best: " + _bestScore.ToString();
+            PlayerPrefs.SetInt("HighScore", _bestScore);
+        }
     }
 
     public void ResumeGame()
     {
-        _gameManager.DisablePausePanel();
+        _gameManager.MakePaused();
         _backgroundAudioSource.Play();
         Time.timeScale = 1;
     }
@@ -169,7 +178,7 @@ public class UIManager : MonoBehaviour
 
     IEnumerator PauseTextFlicker()
     {
-        while (Time.time < 10.0f)
+        while (Time.time < 8.0f)
         {
             Color pauseColor = _pauseText.color;
 
@@ -177,14 +186,14 @@ public class UIManager : MonoBehaviour
             {
                 pauseColor.a = _pauseText.color.a + _pauseFadeSpeed;
                 _pauseText.color = pauseColor;
-                yield return new WaitForSeconds(0.02f);
+                yield return new WaitForSeconds(0.015f);
             }
 
             while (pauseColor.a > 0)
             {
                 pauseColor.a = _pauseText.color.a - _pauseFadeSpeed;
                 _pauseText.color = pauseColor;
-                yield return new WaitForSeconds(0.02f);
+                yield return new WaitForSeconds(0.015f);
             }
         }
     }

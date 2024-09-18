@@ -21,13 +21,17 @@ public class GameManager : MonoBehaviour
 
     private SpawnManager _spawnManager;
     private AudioSource _backgroundAudioSource;
+    private bool _isPaused = false;
 
-    private float _speedUpdateDelay = 0.25f;
+    private float _speedUpdateDelay = 0.2f;
+
+    private UIManager _uiManager;
     // Start is called before the first frame update
     void Start()
     {
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         _backgroundAudioSource = GameObject.Find("Audio_Manager").transform.Find("Background").GetComponent<AudioSource>();
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
         if (_spawnManager == null)
         {
@@ -36,6 +40,10 @@ public class GameManager : MonoBehaviour
         if (_backgroundAudioSource == null)
         {
             Debug.LogError("Background AudioSource is NULL.");
+        }
+        if (_uiManager == null)
+        {
+            Debug.LogError("The UI Manager is NULL.");
         }
     }
 
@@ -67,9 +75,17 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.P))
         {
-            _pauseMenuPanel.SetActive(true);
-            Time.timeScale = 0;
-            _backgroundAudioSource.Pause();
+            if (_isPaused)
+            {
+                _uiManager.ResumeGame();
+            }
+            else
+            {
+                _isPaused = true;
+                _pauseMenuPanel.SetActive(true);
+                Time.timeScale = 0;
+                _backgroundAudioSource.Pause();
+            }
         }
     }
 
@@ -98,11 +114,11 @@ public class GameManager : MonoBehaviour
     {
         while (_isGameOver == false)
         {
-            yield return new WaitForSeconds(4.75f + _speedUpdateDelay);
+            yield return new WaitForSeconds(4.4f + _speedUpdateDelay);
             _speedUpdateDelay += 0.25f;
-            _enemySpeed += 0.12f;
-            _playerSpeed += 0.12f;
-            _powerupSpeed += 0.051f;
+            _enemySpeed += 0.15f;
+            _playerSpeed += 0.15f;
+            _powerupSpeed += 0.1f;
         }
     }
 
@@ -119,5 +135,11 @@ public class GameManager : MonoBehaviour
     public float GetPowerupSpeed()
     {
         return _powerupSpeed;
+    }
+
+    public void MakePaused()
+    {
+        _isPaused = false;
+        DisablePausePanel();
     }
 }

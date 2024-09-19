@@ -78,11 +78,12 @@ public class Player : MonoBehaviour
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
         _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         _explosionAudioSource = GameObject.Find("Audio_Manager").transform.Find("Explosion").GetComponent<AudioSource>();
-        _tripleShotNum = _speedNum = _shieldNum = 0;
+        _AudioSource = GetComponent<AudioSource>();
 
+        _tripleShotNum = _speedNum = _shieldNum = 0;
         _rightEngine.SetActive(false);
         _leftEngine.SetActive(false);
-        _AudioSource = GetComponent<AudioSource>();
+        
 
         if (_explosionAudioSource == null)
         {
@@ -256,8 +257,8 @@ public class Player : MonoBehaviour
 
     IEnumerator TripleShotCoolDown()
     {
-        _tripleShotNum -= 1;
         yield return new WaitForSeconds(_tripleShotCoolDownTime);
+        _tripleShotNum -= 1;
         if ( _tripleShotNum < 1)
         {
             _tripleShotActivated = false;
@@ -273,8 +274,8 @@ public class Player : MonoBehaviour
 
     IEnumerator SpeedCoolDown()
     {
-        _speedNum -= 1;
         yield return new WaitForSeconds(_speedCoolDownTime);
+        _speedNum -= 1;
         if (_speedNum < 1)
         {
             _speedActivated = false;

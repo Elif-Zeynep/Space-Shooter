@@ -10,10 +10,17 @@ public class Laser : MonoBehaviour
     private float _laserLowerLimit = -6.0f;
     private float _movement = 1; // player laser = 1, enemy laser = -1
 
+    private GameManager _gameManager;
+
     // Start is called before the first frame update
     void Start()
     {
-
+        _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        if (_gameManager == null)
+        {
+            Debug.LogError("The Game Manager is NULL.");
+        }
+        _speed = _gameManager.GetLaserSpeed();
     }
 
     // Update is called once per frame

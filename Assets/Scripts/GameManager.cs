@@ -15,9 +15,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float _enemySpeed = 2.6f;
     [SerializeField]
-    private float _playerSpeed = 6f;
+    private float _playerSpeed = 5.9f;
     [SerializeField]
     private float _powerupSpeed = 3.0f;
+    [SerializeField]
+    private float _laserSpeed = 8.0f;
+    [SerializeField]
+    private float _commonSpeedIncrease = 0.15f;
 
     private SpawnManager _spawnManager;
     private AudioSource _backgroundAudioSource;
@@ -114,10 +118,11 @@ public class GameManager : MonoBehaviour
     {
         while (_isGameOver == false)
         {
-            yield return new WaitForSeconds(4.4f + _speedUpdateDelay);
+            yield return new WaitForSeconds(5f + _speedUpdateDelay);
             _speedUpdateDelay += 0.25f;
-            _enemySpeed += 0.15f;
-            _playerSpeed += 0.15f;
+            _enemySpeed += _commonSpeedIncrease;
+            _playerSpeed += _commonSpeedIncrease;
+            _laserSpeed += _commonSpeedIncrease;
             _powerupSpeed += 0.1f;
         }
     }
@@ -130,6 +135,11 @@ public class GameManager : MonoBehaviour
     public float GetPlayerSpeed()
     {
         return _playerSpeed;
+    }
+
+    public float GetLaserSpeed()
+    {
+        return _laserSpeed;
     }
 
     public float GetPowerupSpeed()

@@ -51,7 +51,7 @@ public class SpawnManager : MonoBehaviour
 
             GameObject newEnemy = Instantiate(_enemyPrefab, pos, Quaternion.identity);
             newEnemy.transform.parent = _enemyContainer.transform;
-            yield return new WaitForSeconds(_enemySpawnRate);
+            yield return new WaitForSeconds(_enemySpawnRate + (Random.Range(-2.5f, 2.3f)));
         }
     }
 
@@ -63,7 +63,7 @@ public class SpawnManager : MonoBehaviour
             Vector3 pos = new Vector3(Random.Range(-8f, 8f), 8, 0);
             int randPowerup = Random.Range(0,3);
             Instantiate(powerups[randPowerup], pos, Quaternion.identity);
-            yield return new WaitForSeconds(Random.Range(5f, 9f));  // spawn every 5-9 seconds randomly
+            yield return new WaitForSeconds(Random.Range(6f, 10f));  // spawn every 6-10 seconds randomly
         }
     }
 
